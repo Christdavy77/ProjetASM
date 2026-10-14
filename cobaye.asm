@@ -12,7 +12,6 @@ _start:
     lea rsi, [msg]
     mov rdx, msg_len
     syscall
-
     mov rax, 60
     xor rdi, rdi
     syscall

